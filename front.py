@@ -4,12 +4,12 @@ from back import response
 import io
 
 x1, y1 = 0, 0
-brush_size = 7
+brush_size = 35
 
 root = tk.Tk()
 root.title("Handwriting Checker")
 
-# Customizable colours
+# Customizable aspects
 background = '#352F44'
 fontColour1 = '#F5F5F5'
 fontColourButton = '#18122B'
@@ -62,7 +62,7 @@ def show_new_page(letter):
         x1, y1 = event.x, event.y
 
     def clear_canvas():
-        canvas.delete("all") 
+        canvas.delete("all")
 
     def increase_brush():
         global brush_size
@@ -70,17 +70,30 @@ def show_new_page(letter):
 
     def decrease_brush():
         global brush_size
-        if brush_size > 7:
+        if brush_size > 35:
             brush_size -= 1
 
+    label_good = tk.Label(root, text="Good job!", bg ='#A2C579', fg=fontColourButton, font=(fontText, 13))
+    label_bad = tk.Label(root, text="Try again", bg ='#FF6969', fg=fontColourButton, font=(fontText, 13))
+
+    def delete_label():
+        label.pack_forget()
+
     def result():
+        #Convert the canvas to an image
         canvas_to_image(canvas)
+        #Rotate and invert the image
         rotate_and_invert_image("canvas_image.png")
         response_result = response("canvas_image.png", letter)
-        if response_result[0] == letter and response_result[1] >= 0.5:
-            print('Good job')
+        if response_result[1] >= 0.5:
+
+            label_good.pack(relx=0.5, rely=0.5, anchor='center')
+            label_good.bind("<Button-1>", lambda event: delete_label())
+
         else:
-            print('You got it twisted')
+
+            label_bad.pack(relx=0.5, rely=0.5, anchor='center')
+            label_bad.bind("<Button-1>", lambda event: delete_label())
 
 
     canvas = tk.Canvas(new_page, bg='white', width=400, height=400)
@@ -99,16 +112,16 @@ def show_new_page(letter):
         button_frame_combined,
         text="Done",
         bg='#A2C579',
-        fg='white',
+        fg=fontColourButton,
         activebackground="#748E63",
-        activeforeground="white",
-        font=('Comic Sans MS', 12),
-        command=result  
+        activeforeground=fontColourButton,
+        font=(fontColourButton, 12),
+        command=result
     )
     btn_increase = tk.Button(button_frame_combined, text="Increase Brush", font=(fontText, 13), command=increase_brush)
     btn_decrease = tk.Button(button_frame_combined, text="Decrease Brush", font=(fontText, 13), command=decrease_brush)
 
-    btn_back.pack(side="left", padx=10)  
+    btn_back.pack(side="left", padx=10)
     btn_clear.pack(side="left", padx=10)
     btn_done.pack(side="left", padx=10)
     btn_increase.pack(side="left", padx=10)
@@ -121,7 +134,7 @@ label.pack(padx=20, pady=30)
 label = tk.Label(root, text="Pick a letter or number.", bg=background , fg=fontColour1, font=(fontText, 30))
 label.pack(padx=20, pady=15)
 
-buttonframe = tk.Frame(root, bg=background )  
+buttonframe = tk.Frame(root, bg=background )
 buttonframe.pack()
 
 all_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
@@ -135,27 +148,27 @@ def create_buttons(buttonframe, characters, start_row):
             width=2,
             text=char,
             bd=3,
-            bg='#A2C579',
-            fg='white',
-            activebackground="#748E63",
-            activeforeground="white",
-            font=('Comic Sans MS', 21),
+            bg=buttonColour,
+            fg=fontColourButton,
+            activebackground=buttonPressed,
+            activeforeground=fontColourButton,
+            font=(fontTextLetters, 21),
             command=lambda char=char: show_new_page(char)
         )
         button.grid(row=row, column=column)
 
 
 def add_row_gap_with_colour(row_index, colour=background , num_columns=13):
-  label = tk.Label(buttonframe, height=2, width=num_columns * 3, bg=colour)  
-  label.grid(row=row_index, column=0, columnspan=num_columns, sticky="ew")  
+  label = tk.Label(buttonframe, height=2, width=num_columns * 3, bg=colour)
+  label.grid(row=row_index, column=0, columnspan=num_columns, sticky="ew")
 
-add_row_gap_with_colour(0, colour=background )  
-create_buttons(buttonframe, all_characters[:26], 0)  
+add_row_gap_with_colour(0, colour=background )
+create_buttons(buttonframe, all_characters[:26], 0)
 
-add_row_gap_with_colour(2, colour=background )  
-create_buttons(buttonframe, all_characters[26:52], 3) 
+add_row_gap_with_colour(2, colour=background )
+create_buttons(buttonframe, all_characters[26:52], 3)
 
-add_row_gap_with_colour(5, colour=background ) 
+add_row_gap_with_colour(5, colour=background )
 create_buttons(buttonframe, all_characters[52:], 6)
 
 
