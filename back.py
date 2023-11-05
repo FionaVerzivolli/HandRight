@@ -14,7 +14,7 @@ training_data = datasets.EMNIST(
     transform=ToTensor(),
 )
 
-#Create a dataloader
+#create dataloader
 train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 
 device = (
@@ -99,18 +99,18 @@ def response(canvas_path, expected_char):
     Predicts the character from the canvas image and compares it to the expected character,
     returning a confidence score for the prediction.
     """
-    # Load the trained model weights
+
     with open('image_recognition.pth', 'rb') as f:
         model.load_state_dict(load(f, map_location=device))
 
-    # Open and preprocess the canvas image
+
     canvas_img = Image.open(canvas_path).convert('L')
     canvas_img = p(canvas_img)  # Apply the transformations
-
-    # Convert the canvas image to tensor
+    
+    #tensor conversion
     canvas_tensor = ToTensor()(canvas_img).unsqueeze(0).to(device)
 
-    # Get the model's prediction for the canvas image
+    #get prediction
     model.eval()
     with torch.no_grad():
         canvas_logits = model(canvas_tensor)
@@ -118,24 +118,23 @@ def response(canvas_path, expected_char):
         canvas_pred_index = torch.argmax(canvas_probs, dim=1).item()
         confidence_score = torch.max(canvas_probs).item()
 
-    # Convert the predicted index to character
+    
     if canvas_pred_index < 10:
-        # Map numbers 0-9 to their corresponding ASCII characters
+        
         canvas_pred_char = str(canvas_pred_index)
     elif 10 <= canvas_pred_index < 36:
-        # Map uppercase letters A-Z to their corresponding ASCII characters
+        
         canvas_pred_char = chr(canvas_pred_index + 55)
     else:
-        # Map lowercase letters a-z to their corresponding ASCII characters
+       
         canvas_pred_char = chr(canvas_pred_index + 61)
 
-    # Print and return the confidence score
+   
     print(f"Canvas predicted character: {canvas_pred_char}")
     print(f"Expected character: {expected_char}")
     print(f"Confidence score of the prediction: {confidence_score:.2f}")
 
-    # Determine the score based on the prediction match
-    # The score could be the confidence if correct, or zero if incorrect
+   
     score = confidence_score if canvas_pred_char == expected_char else 0
 
     return [canvas_pred_char, score]
