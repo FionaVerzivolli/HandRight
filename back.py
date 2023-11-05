@@ -14,7 +14,7 @@ training_data = datasets.EMNIST(
     transform=ToTensor(),
 )
 
-# create a dataloader
+# Create a dataloader
 train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 
 device = (
@@ -79,11 +79,11 @@ def train(dataloader, model, loss_fn, optimizer):
     for batch, (x, y) in enumerate(dataloader):
         x, y = x.to(device), y.to(device)
 
-        # compute prediction error
+        # Compute prediction error
         pred = model(x)
         loss = loss_fn(pred, y)
 
-        # backpropagation
+        # Backpropagation
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
@@ -98,18 +98,18 @@ def response(canvas_path: str, expected_char: str):
     Predicts the character from the canvas image and compares it to the expected character,
     returning a confidence score for the prediction.
     """
-    # load the trained model weights
+    # Load the trained model weights
     with open('image_recognition.pth', 'rb') as f:
         model.load_state_dict(load(f, map_location=device))
 
-    # open and preprocess the canvas image
+    # Open and preprocess the canvas image
     canvas_img = Image.open(canvas_path).convert('L')
     canvas_img = p(canvas_img)  # Apply the transformations
 
-    # convert the canvas image to tensor
+    # Convert the canvas image to tensor
     canvas_tensor = ToTensor()(canvas_img).unsqueeze(0).to(device)
 
-    # get the model's prediction for the canvas image
+    # Get the model's prediction for the canvas image
     model.eval()
     with torch.no_grad():
         canvas_logits = model(canvas_tensor)
@@ -117,15 +117,15 @@ def response(canvas_path: str, expected_char: str):
         canvas_pred_index = torch.argmax(canvas_probs, dim=1).item()
         confidence_score = torch.max(canvas_probs).item()
 
-    # convert the predicted index to character
+    # Convert the predicted index to character
     if canvas_pred_index < 10:
-        # map numbers 0-9 to their corresponding ASCII characters
+        # Map numbers 0-9 to their corresponding ASCII characters
         canvas_pred_char = str(canvas_pred_index)
     elif 10 <= canvas_pred_index < 36:
-        # map uppercase letters A-Z to their corresponding ASCII characters
+        # Map uppercase letters A-Z to their corresponding ASCII characters
         canvas_pred_char = chr(canvas_pred_index + 55)
     else:
-        # map lowercase letters a-z to their corresponding ASCII characters
+        # Map lowercase letters a-z to their corresponding ASCII characters
         canvas_pred_char = chr(canvas_pred_index + 61)
 
     # Print and return the confidence score

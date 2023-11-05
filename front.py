@@ -9,7 +9,7 @@ brush_size = 15
 root = tk.Tk()
 root.title("Handwriting Checker")
 
-# customizable aspects
+# Customizable aspects
 background = '#352F44'
 fontColour1 = '#F5F5F5'
 fontColourButton = '#18122B'
@@ -35,7 +35,7 @@ def show_new_page(letter):
                       font=(fontText, 25, 'bold'))
     label1.pack(padx=20, pady=25)
 
-    label2 = tk.Label(new_page, background=background, text="Try your best! Click 'done' once you're finished.",
+    label2 = tk.Label(new_page, background=background, text="Try your best! Click 'Done' once you're finished.",
                       fg=fontColour1, font=(fontText, 20))
     label2.pack(padx=20, pady=10)
 
@@ -46,7 +46,7 @@ def show_new_page(letter):
         img.save(filename)
 
     def rotate_and_invert_image(image_path):
-        # makes sure to rotate the image to match our dataset, and invert it
+        # Makes sure to rotate the image to match our dataset, and invert it
         with Image.open(image_path) as image:
             inverted_image = ImageOps.invert(image)
             rotated_image = inverted_image.rotate(-90, expand=True)
@@ -76,8 +76,10 @@ def show_new_page(letter):
         if brush_size > 15:
             brush_size -= 1
 
-    lg = tk.Label(new_page, text="Good job!", bg='#A2C579', height=20, width=20, fg=fontColourButton, font=(fontText, 13))
-    lb = tk.Label(new_page, text="Try again", bg='#FF6969', height=20, width=20, fg=fontColourButton, font=(fontText, 13))
+    lg = tk.Label(new_page, text="Good job!", bg='#A2C579', height=20, width=20, fg=fontColourButton,
+                  font=(fontText, 13))
+    lb = tk.Label(new_page, text="Try again", bg='#FF6969', height=20, width=20, fg=fontColourButton,
+                  font=(fontText, 13))
 
     def delete_label():
         label.destroy()
@@ -85,13 +87,13 @@ def show_new_page(letter):
     def result():
         global lg, lb
 
-        # convert the canvas to an image
+        # Convert the canvas to an image
         canvas_to_image(canvas)
-        # rotate and invert the image
+        # Rotate and invert the image
         rotate_and_invert_image("canvas_image.png")
         response_result = response("canvas_image.png", letter)
 
-        # destroy any existing feedback labels
+        # Destroy any existing feedback labels
         try:
             lg.destroy()
         except NameError:
@@ -101,9 +103,15 @@ def show_new_page(letter):
         except NameError:
             pass
 
-        # create a new label for feedback
-        if response_result[1] >= 0.5:
-            lg = tk.Label(new_page, text="Good job!", bg='#A2C579', fg=fontColourButton, font=(fontText, 13))
+        #cxzsjpouw are similar between upper and lowercase, 0 and O are similar characters
+
+        # Create a new label for feedback
+        if is_similar_letter(response_result[0], letter) and response_result[1] >= 0.7:
+            lg = tk.Label(new_page, text="Excellent performance", bg='#A2C579', fg=fontColourButton, font=(fontText, 13))
+            lg.pack(pady=(20, 0))  # Adjust padding as needed
+            lg.bind("<Button-1>", lambda event: delete_label(lg))
+        elif is_similar_letter(response_result[0], letter) and response_result[1] >= 0.3:
+            lg = tk.Label(new_page, text="Good job!", bg='#fdfd96', fg=fontColourButton, font=(fontText, 13))
             lg.pack(pady=(20, 0))  # Adjust padding as needed
             lg.bind("<Button-1>", lambda event: delete_label(lg))
         else:
@@ -146,7 +154,20 @@ def show_new_page(letter):
     btn_decrease.pack(side="left", padx=10)
 
 
-# main page labels
+def is_similar_letter(guess: str, actual: str) -> bool:
+    if guess == actual:
+        return True
+    elif guess in 'o0O' and actual in 'o0O':
+        return True
+    elif guess in 'fcxzsjpuw' and guess.upper() == actual:
+        return True
+    elif guess in 'FCXZSJPUW' and guess.lower() == actual:
+        return True
+    else:
+        return False
+
+
+# Main page labels
 label = tk.Label(root, text="Handwriting Checker", bg=background, fg=fontColour1, font=(fontText, 50, 'bold'))
 label.pack(padx=20, pady=30)
 
@@ -165,7 +186,7 @@ def create_buttons(buttonframe, characters, start_row):
         column = i % 13
         button = tk.Button(
             buttonframe,
-            width=2,
+            width=4,
             text=char,
             bd=3,
             bg=buttonColour,
