@@ -4,7 +4,7 @@ from back import response
 import io
 
 x1, y1 = 0, 0
-brush_size = 3  # Initial brush size
+brush_size = 7
 
 root = tk.Tk()
 root.title("Handwriting Checker")
@@ -70,7 +70,7 @@ def show_new_page(letter):
 
     def decrease_brush():
         global brush_size
-        if brush_size > 1:
+        if brush_size > 7:
             brush_size -= 1
 
     def result():
