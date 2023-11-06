@@ -1,4 +1,4 @@
-# handwritingchecker
+# HandRight
 
 Entry for NewHacks 2023 Hackathon
 
